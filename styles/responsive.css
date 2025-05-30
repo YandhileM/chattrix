@@ -1,12 +1,116 @@
-/* Mobile styles */
-@media (max-width: 767px) {
-  .desktop-only {
+/* Mobile-first breakpoints (matches useResponsive.js) */
+/* Small Mobile: < 400px */
+@media (max-width: 399px) {
+  .xs-only {
+    display: block !important;
+  }
+  .sm-and-up,
+  .md-and-up,
+  .lg-and-up,
+  .xl-and-up,
+  .\32xl-and-up {
     display: none !important;
   }
 }
 
-/* Desktop styles */
+/* Medium Mobile: 400-575px */
+@media (min-width: 400px) and (max-width: 575px) {
+  .sm-only {
+    display: block !important;
+  }
+  .xs-only,
+  .md-and-up,
+  .lg-and-up,
+  .xl-and-up,
+  .\32xl-and-up {
+    display: none !important;
+  }
+}
+
+/* Large Mobile: 576-767px */
+@media (min-width: 576px) and (max-width: 767px) {
+  .md-only {
+    display: block !important;
+  }
+  .xs-only,
+  .sm-only,
+  .lg-and-up,
+  .xl-and-up,
+  .\32xl-and-up {
+    display: none !important;
+  }
+}
+
+/* Tablet: 768-991px */
+@media (min-width: 768px) and (max-width: 991px) {
+  .lg-only {
+    display: block !important;
+  }
+  .xs-only,
+  .sm-only,
+  .md-only,
+  .xl-and-up,
+  .\32xl-and-up {
+    display: none !important;
+  }
+}
+
+/* Large Tablet: 992-1023px */
+@media (min-width: 992px) and (max-width: 1023px) {
+  .xl-only {
+    display: block !important;
+  }
+  .xs-only,
+  .sm-only,
+  .md-only,
+  .lg-only,
+  .\32xl-and-up {
+    display: none !important;
+  }
+}
+
+/* Desktop: 1024-1199px */
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .\32xl-only {
+    display: block !important;
+  }
+  .xs-only,
+  .sm-only,
+  .md-only,
+  .lg-only,
+  .xl-only {
+    display: none !important;
+  }
+}
+
+/* Large Desktop: 1200px+ */
+@media (min-width: 1200px) {
+  .\33xl-only {
+    display: block !important;
+  }
+  .xs-only,
+  .sm-only,
+  .md-only,
+  .lg-only,
+  .xl-only,
+  .\32xl-only {
+    display: none !important;
+  }
+}
+
+/* Utility classes for general mobile/desktop (legacy support) */
+@media (max-width: 767px) {
+  .mobile-only {
+    display: block !important;
+  }
+  .desktop-only {
+    display: none !important;
+  }
+}
 @media (min-width: 768px) {
+  .desktop-only {
+    display: block !important;
+  }
   .mobile-only {
     display: none !important;
   }
