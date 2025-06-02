@@ -1,7 +1,7 @@
 <template>
   <div class="login-view">
     <div class="login-container">
-      <h1>Login</h1>
+      <!-- <h1>Login</h1> -->
       <LoginForm />
     </div>
   </div>
