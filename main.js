@@ -6,6 +6,7 @@ import App from './App.vue'
 
 // Import global styles
 import './styles/main.css'
+import 'primeflex/primeflex.css'
 
 const app = createApp(App)
 
