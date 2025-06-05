@@ -1,6 +1,10 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 
 export function useResponsive() {
+  // const instance = getCurrentInstance()
+  // if (!instance) {
+  //   throw new Error('useResponsive must be called within a component setup function')
+  // }
   // Screen size refs
   const windowWidth = ref(window.innerWidth)
   const windowHeight = ref(window.innerHeight)
