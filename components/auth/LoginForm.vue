@@ -41,45 +41,20 @@ const { isMobile } = useResponsive()
 const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
-const isLoading = ref(false)
+
+// Use loading state from store
+const isLoading = computed(() => authStore.isLoading)
 
 // Clear error message
 const clearError = () => {
   errorMessage.value = ''
 }
 
-// Form validation
-const validateForm = () => {
-  if (!email.value || !password.value) {
-    errorMessage.value = 'Please fill in all fields'
-    return false
-  }
 
-  // Basic email validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(email.value)) {
-    errorMessage.value = 'Please enter a valid email address'
-    return false
-  }
-
-  if (password.value.length < 6) {
-    errorMessage.value = 'Password must be at least 6 characters long'
-    return false
-  }
-
-  return true
-}
 
 const handleSubmit = async () => {
   // Clear previous errors
   clearError()
-
-  // Validate form
-  if (!validateForm()) {
-    return
-  }
-
-  isLoading.value = true
 
   try {
     // Create user data object
@@ -89,9 +64,9 @@ const handleSubmit = async () => {
     }
 
     // Call the store's login action
-    const response = await authStore.login(userData, null)
+    const response = await authStore.login(userData)
 
-    // Store token in localStorage if provided
+    // Store token in localStorage
     if (response.token) {
       localStorage.setItem('auth_token', response.token)
     }
@@ -107,29 +82,12 @@ const handleSubmit = async () => {
     }
   } catch (error) {
     console.error('Login error:', error)
-
-    // Handle different types of errors
-    if (error.name === 'NetworkError' || error.message.includes('fetch')) {
-      errorMessage.value = 'Network error. Please check your connection and try again.'
-    } else if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-      errorMessage.value = 'Invalid email or password. Please try again.'
-    } else if (error.message.includes('429') || error.message.includes('Too Many Requests')) {
-      errorMessage.value = 'Too many login attempts. Please wait a moment and try again.'
-    } else if (error.message.includes('500') || error.message.includes('Server Error')) {
-      errorMessage.value = 'Server error. Please try again later.'
-    } else if (error.message.includes('timeout')) {
-      errorMessage.value = 'Request timed out. Please try again.'
-    } else {
-      // Generic error message
-      errorMessage.value = error.message || 'Login failed. Please try again.'
-    }
-  } finally {
-    isLoading.value = false
+    errorMessage.value = error.message || 'Login failed. Please try again.'
   }
 }
 
-// Optional: Clear form on component unmount
-import { onUnmounted } from 'vue'
+
+import { onUnmounted, computed } from 'vue'
 onUnmounted(() => {
   email.value = ''
   password.value = ''
