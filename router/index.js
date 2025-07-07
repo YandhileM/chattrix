@@ -6,6 +6,7 @@ import LoginView from '@/views/auth/LoginView.vue'
 import SignupView from '@/views/auth/SignupView.vue'
 import ForgotPasswordView from '@/views/auth/ForgotPasswordView.vue'
 import { useResponsive } from '@/composables/useResponsive'
+import { useAuthStore } from '@/store/modules/auth'
 
 const routes = [
   {
@@ -57,7 +58,14 @@ const router = createRouter({
 // Enhanced navigation guard for authentication
 router.beforeEach(async (to, from, next) => {
   const { isMobile } = useResponsive()
-  const isAuthenticated = localStorage.getItem('auth_token')
+  const authStore = useAuthStore()
+
+  // Initialize auth store if not already done
+  if (!authStore.isAuthenticated && localStorage.getItem('auth_token')) {
+    authStore.initializeAuth()
+  }
+
+  const isAuthenticated = authStore.isAuthenticated
   const intendedRoute = localStorage.getItem('intended_route')
 
   // Clear intended route when accessing auth pages
@@ -97,4 +105,5 @@ router.beforeEach(async (to, from, next) => {
 
   next()
 })
+
 export default router
