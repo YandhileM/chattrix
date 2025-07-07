@@ -1,17 +1,13 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { authService } from '@/services/authService'
 
 export const useAuthStore = defineStore('auth', () => {
   // State
-  const user = ref(null)
+  const authData = ref(null) // Store complete login response
   const isAuthenticated = ref(false)
   const token = ref(null)
   const isLoading = ref(false)
-
-  // Getters
-  const isAdmin = computed(() => user.value?.role === 'admin')
-  const userId = computed(() => user.value?.id)
 
   // Actions
   const login = async (userData) => {
@@ -25,11 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
       })
 
       // Update store state with successful login
-      user.value = response.user || {
-        id: response.userId,
-        email: userData.email,
-        role: response.role || 'user',
-      }
+      authData.value = response // Store complete response
       token.value = response.token
       isAuthenticated.value = true
 
@@ -37,7 +29,7 @@ export const useAuthStore = defineStore('auth', () => {
       return response
     } catch (error) {
       // Reset state on login failure
-      user.value = null
+      authData.value = null
       token.value = null
       isAuthenticated.value = false
 
@@ -51,7 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const logout = () => {
-    user.value = null
+    authData.value = null
     token.value = null
     isAuthenticated.value = false
 
@@ -74,14 +66,10 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     // State
-    user,
+    authData,
     isAuthenticated,
     token,
     isLoading,
-
-    // Getters
-    isAdmin,
-    userId,
 
     // Actions
     login,
