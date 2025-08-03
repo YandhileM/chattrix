@@ -6,7 +6,7 @@
 /* Import other styles */
 @import './variables.css';
 @import './responsive.css';
-@import 'tailwindcss';
+/* @import 'tailwindcss'; */
 
 /* Global styles */
 * {
