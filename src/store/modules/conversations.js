@@ -91,6 +91,40 @@ export const useConversationsStore = defineStore('conversations', () => {
     }
   }
 
+  const createDirectChat = async (user) => {
+    try {
+      // Check if a direct chat already exists with this user
+      const existingChat = conversations.value.find(conv => 
+        conv.isDirectChat && 
+        conv.participants && 
+        conv.participants.some(participant => participant.id === user.id)
+      )
+      
+      if (existingChat) {
+        console.log('Direct chat already exists:', existingChat)
+        return existingChat
+      }
+      
+      // Create a new direct chat
+      const title = `Chat with ${user.firstName} ${user.lastName}`.trim()
+      const newConversation = await chatService.createConversation(
+        title,
+        'Descr', // Empty description for direct chats
+        true, // isDirectChat
+        [user.id] // userIds array with the selected user
+      )
+      
+      // Add the new conversation to the list
+      conversations.value.unshift(newConversation)
+      
+      console.log('New direct chat created:', newConversation)
+      return newConversation
+    } catch (err) {
+      console.error('Error creating direct chat:', err)
+      throw err
+    }
+  }
+
   const clearCurrentChat = () => {
     currentChatId.value = null
     currentChatMessages.value = []
@@ -141,6 +175,7 @@ export const useConversationsStore = defineStore('conversations', () => {
     setCurrentChat,
     fetchChatMessages,
     sendMessage,
+    createDirectChat,
     clearCurrentChat,
     clearError,
     
