@@ -1,13 +1,9 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 
 export function useResponsive() {
-  // const instance = getCurrentInstance()
-  // if (!instance) {
-  //   throw new Error('useResponsive must be called within a component setup function')
-  // }
-  // Screen size refs
-  const windowWidth = ref(window.innerWidth)
-  const windowHeight = ref(window.innerHeight)
+  // Screen size refs - initialize with current window size if available
+  const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024)
+  const windowHeight = ref(typeof window !== 'undefined' ? window.innerHeight : 768)
 
   // Standard device type detection
   const isMobile = ref(false)
@@ -29,6 +25,8 @@ export function useResponsive() {
   const isLandscape = ref(false)
 
   const updateResponsiveValues = () => {
+    if (typeof window === 'undefined') return
+
     const width = window.innerWidth
     const height = window.innerHeight
 
@@ -53,6 +51,11 @@ export function useResponsive() {
     // Orientation detection
     isPortrait.value = height > width
     isLandscape.value = width > height
+  }
+
+  // Initialize values immediately if window is available
+  if (typeof window !== 'undefined') {
+    updateResponsiveValues()
   }
 
   onMounted(() => {
