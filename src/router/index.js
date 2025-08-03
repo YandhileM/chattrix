@@ -1,10 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-// import ChatView from '@/views/chat/ChatView.vue'
-// import ConversationsView from '@/views/chat/ConversationsView.vue'
-// import NewConversationView from '@/views/chat/NewConversationView.vue'
-// import LoginView from '@/views/auth/LoginView.vue'
-// import SignupView from '@/views/auth/SignupView.vue'
-// import ForgotPasswordView from '@/views/auth/ForgotPasswordView.vue'
 import { useResponsive } from '@/composables/useResponsive'
 import { useAuthStore } from '@/store/modules/auth'
 
@@ -20,7 +14,7 @@ const routes = [
   },
   {
     path: '/',
-    name: 'Chat',
+    name: 'ChatHome',
     component: () => import('@/views/chat/ChatView.vue'),
     meta: {
       requiresAuth: true,
@@ -32,38 +26,26 @@ const routes = [
     name: 'Conversations',
     component: () => import('@/views/chat/ConversationsView.vue'),
     meta: {
-      // requiresAuth: true,
-      // mobileOnly: true,
+      requiresAuth: true,
+      mobileOnly: true,
     },
   },
-    {
-  path: '/users',
-  name: 'Users',
-  component: () => import('@/components/chat/UserSearch.vue') 
-},
+  {
+    path: '/users',
+    name: 'Users',
+    component: () => import('@/components/chat/UserSearch.vue'),
+    meta: {
+      requiresAuth: true,
+    }
+  },
   {
     path: '/chat/:id',
-    name: 'Chat',
-    component: () => import('@/views/chat/ChatView.vue')
+    name: 'ChatRoom',
+    component: () => import('@/views/chat/ChatView.vue'),
+    meta: {
+      requiresAuth: true,
+    }
   },
-  {
-    path: '/conversations',
-    name: 'Conversations', 
-    component: () => import('@/views/chat/ConversationsView.vue')
-  },
-  // {
-  //   path: '/chat/:id',
-  //   name: 'ChatRoom',
-  //   component: () => import('@/views/chat/ChatView.vue'),
-  //   meta: { requiresAuth: true },
-  // },
-  // {
-  //   path: '/new-conversation',
-  //   name: 'NewConversation',
-  //   component: NewConversationView,
-  //   meta: { requiresAuth: true },
-  // },
-
 ]
 
 const router = createRouter({
@@ -109,11 +91,13 @@ router.beforeEach(async (to, from, next) => {
     return
   }
 
+  // Handle desktop-only routes on mobile
   if (to.meta.desktopOnly && isMobile.value) {
     next('/conversations')
     return
   }
-  // Handle mobile-only routes
+
+  // Handle mobile-only routes on desktop
   if (to.meta.mobileOnly && !isMobile.value) {
     next('/')
     return
