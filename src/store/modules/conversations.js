@@ -2,6 +2,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { chatService } from '@/services/chatService'
+import { signalRService } from '@/services/signalRService'
+import { useAuthStore } from '@/store/modules/auth'
 
 export const useConversationsStore = defineStore('conversations', () => {
   // State
@@ -13,6 +15,59 @@ export const useConversationsStore = defineStore('conversations', () => {
   const isLoadingMessages = ref(false)
   const error = ref(null)
   const messagesError = ref(null)
+  
+  // SignalR related state
+  const isSignalRConnected = ref(false)
+
+  // SignalR initialization
+  const initializeSignalR = async () => {
+    const authStore = useAuthStore()
+    const token = authStore.token
+    
+    if (!token) {
+      console.warn('No auth token available for SignalR connection')
+      return
+    }
+
+    try {
+      await signalRService.connect(token)
+      isSignalRConnected.value = true
+      setupSignalRListeners()
+      console.log('SignalR initialized successfully')
+    } catch (error) {
+      console.error('Failed to initialize SignalR:', error)
+      isSignalRConnected.value = false
+    }
+  }
+  const clearError = () => {
+    error.value = null
+    messagesError.value = null
+  }
+
+  const setupSignalRListeners = () => {
+    // Listen for incoming messages from your C# hub
+    signalRService.onMessageReceived((message) => {
+      console.log('New message received via SignalR:', message)
+      
+      // Add message to current chat if it belongs to the active chat
+      if (currentChatId.value === message.chatId) {
+        // Check if message already exists (prevent duplicates)
+        const existingMessage = currentChatMessages.value.find(m => m.id === message.id)
+        if (!existingMessage) {
+          currentChatMessages.value.push(message)
+        }
+      }
+      
+      // Update the conversation's last message
+      const conversationIndex = conversations.value.findIndex(conv => conv.id === message.chatId)
+      if (conversationIndex !== -1) {
+        conversations.value[conversationIndex].lastMessage = message
+        // Move conversation to top of list
+        const conversation = conversations.value.splice(conversationIndex, 1)[0]
+        conversations.value.unshift(conversation)
+      }
+    })
+  }
 
   // Actions
   const fetchConversations = async () => {
@@ -35,9 +90,19 @@ export const useConversationsStore = defineStore('conversations', () => {
   const setCurrentChat = async (chatId) => {
     if (currentChatId.value === chatId) return
     
+    // Leave previous chat group
+    if (currentChatId.value && isSignalRConnected.value) {
+      await signalRService.leaveChatGroup(currentChatId.value)
+    }
+    
     currentChatId.value = chatId
     currentChatMessages.value = []
     currentChatDetails.value = null
+    
+    // Join new chat group
+    if (chatId && isSignalRConnected.value) {
+      await signalRService.joinChatGroup(chatId)
+    }
     
     await fetchChatMessages(chatId)
   }
@@ -68,6 +133,7 @@ export const useConversationsStore = defineStore('conversations', () => {
     }
   }
 
+  // Keep your existing sendMessage implementation unchanged
   const sendMessage = async (messageText) => {
     if (!currentChatId.value || !messageText.trim()) return
     
@@ -126,15 +192,19 @@ export const useConversationsStore = defineStore('conversations', () => {
   }
 
   const clearCurrentChat = () => {
+    if (currentChatId.value && isSignalRConnected.value) {
+      signalRService.leaveChatGroup(currentChatId.value)
+    }
+    
     currentChatId.value = null
     currentChatMessages.value = []
     currentChatDetails.value = null
     messagesError.value = null
   }
 
-  const clearError = () => {
-    error.value = null
-    messagesError.value = null
+  const disconnectSignalR = async () => {
+    await signalRService.disconnect()
+    isSignalRConnected.value = false
   }
 
   // Getters
@@ -169,15 +239,20 @@ export const useConversationsStore = defineStore('conversations', () => {
     isLoadingMessages,
     error,
     messagesError,
+    isSignalRConnected,
     
     // Actions
     fetchConversations,
     setCurrentChat,
     fetchChatMessages,
-    sendMessage,
+    sendMessage, // Keep your existing implementation
     createDirectChat,
     clearCurrentChat,
     clearError,
+    
+    // SignalR Actions
+    initializeSignalR,
+    disconnectSignalR,
     
     // Getters
     getConversationById,
